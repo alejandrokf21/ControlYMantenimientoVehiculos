@@ -6,22 +6,46 @@
 #include <conio.h>
 
 struct RegUsusario{
-	char user[20];
-   char password[16];
+
+	char user[10];
+    char name[15];
+    char password[16];
+    char type[3];
 }userList, userAux;
 
 //Declaracion de variables globales, funciones y metodos
+char typeGlobal[3], nameGlobal[15]={' '};
+
 void iniciarSesion();
 int verificarUsuario(char promptUser[20], char promptPassword[16]);
+void menuPrincpal(char type[3]);
 
 
 main(){
+   /*FILE *fp;
+   int i=0;
+    fp = fopen("users.dat","a+b");
+    clrscr();
+    do
+    {
+        cout<<"Ingrese el nuevo usuario: ";
+        cin>>userList.user;
+        cout<<"Ingrese el nombre: ";
+        gets(userList.name);
+        cout<<"Ingrese la contraseña: ";
+        cin>>userList.password;
+        cout<<"Ingrese Tipo de usuario: ";
+        cin>>userList.type;
+        fwrite(&userList, sizeof(userList), 1, fp);
+         i++;
+    } while (i<8);
+    fclose(fp); */
 	iniciarSesion();
 }
 
 void iniciarSesion(){
-   char promptUser[20], promptPassword[16], op;
-   int menu=400, ver, contador=0;
+   char promptUser[20], promptPassword[16]={0}, op, c;
+   int menu=400, ver, contador=0,i=0;
 
   FILE *fp;
    fp=fopen("users.dat", "r+b");
@@ -47,7 +71,7 @@ void iniciarSesion(){
     }else{
         clrscr();
         menu=400;
-        //Codigo a borrar
+        //----->Codigo a borrar
         fread(&userList, sizeof(userList), 1, fp);
         while(!feof(fp)){
             cout<<userList.user<<" | "<<userList.password<<endl;
@@ -55,13 +79,19 @@ void iniciarSesion(){
         }
 
         do{
+        		i=0 ;
             cout<<"+-----------------------------------------+"<<endl;
             cout<<"|            INICIO DE SESION             |"<<endl;
             cout<<"+-----------------------------------------+"<<endl;
             cout<<" Usuario: ";
             cin>>promptUser;
             cout<<" Contrasena: ";
-            cin>>promptPassword;
+            memset( promptPassword, 0, 16 );
+            while((c=_getch())!=13) {
+                promptPassword[i] = c;
+                putch('*');
+                i++;
+            }
             cout<<"+-----------------------------------------+"<<endl;
             ver = verificarUsuario(promptUser, promptPassword);
             if(ver!=1 && contador<3){
@@ -75,10 +105,10 @@ void iniciarSesion(){
                 //entra al menu();
                 clrscr();
                 fclose(fp);
-                //menuPrincpal();
+                menuPrincpal(typeGlobal);
                 contador=4;
             }
-        }while(contador<4);        
+        }while(contador<4);
     }
     fclose(fp);
 }
@@ -93,10 +123,10 @@ int verificarUsuario(char promptUser[20], char promptPassword[16]){
     while(!feof(fp)){
         compUser=strcmp(promptUser,userList.user);
         compPass=strcmp(promptPassword, userList.password);
-        fread(&userList, sizeof(userList), 1, fp);
 
         if(compUser==0 && compPass==0){
-            //strcpy(usuarioGlobal,promptUser);
+            strcpy(nameGlobal,userList.name);
+            strcpy(typeGlobal,userList.type);
             fclose(fp);
             return 1;
             //found=false;
@@ -104,6 +134,27 @@ int verificarUsuario(char promptUser[20], char promptPassword[16]){
             fclose(fp);
             return 404;
         }
+        fread(&userList, sizeof(userList), 1, fp);
     }
-    fclose(fp);    
+    fclose(fp);
+}
+
+void menuPrincpal(char type[3]){
+    int op, menu=404;
+    char des;
+
+    do{
+        clrscr();
+        cout<<"--------- Menu Principal --------"<<endl;
+        cout<<"     Bienvenido "<< nameGlobal<<"! "<<endl;
+        cout<<"---------------------------------"<<endl;
+        cout<<" 1. Gestion de Usuarios"<<endl;
+        cout<<" 2. Lista Enlazada"<<endl;
+        cout<<" 3. Lista Doblemente Enlazada"<<endl;
+        cout<<" 4. Pilas"<<endl;
+        cout<<" 5. Salir"<<endl;
+        cout<<"---------------------------------"<<endl;
+        cout<<" Ingrese su opcion: ";
+        cin>>op;
+    }while(true);
 }
