@@ -8,9 +8,9 @@
 struct RegUsusario{
 
 	char user[10];
-    char name[15];
+    char name[18];
     char password[16];
-    char type[3];
+    char type[4];
 }userList, userAux;
 
 //Declaracion de variables globales, funciones y metodos
@@ -18,7 +18,9 @@ char typeGlobal[3], nameGlobal[15]={' '};
 
 void iniciarSesion();
 int verificarUsuario(char promptUser[20], char promptPassword[16]);
-void menuPrincpal(char type[3]);
+int opcionSalir();
+void menuInicial();
+void menuPrincpal(char type[4]);
 
 
 main(){
@@ -40,7 +42,7 @@ main(){
          i++;
     } while (i<8);
     fclose(fp); */
-	iniciarSesion();
+	menuInicial();
 }
 
 void iniciarSesion(){
@@ -139,22 +141,117 @@ int verificarUsuario(char promptUser[20], char promptPassword[16]){
     fclose(fp);
 }
 
-void menuPrincpal(char type[3]){
+void menuInicial(){
+    int op, menu=404;
+
+    do{
+        clrscr();
+        cout<<"---------------------------------"<<endl;
+        cout<<"         MENU INICIAL  "<<endl;
+        cout<<"---------------------------------"<<endl;
+        cout<<" 1. Iniciar Session"<<endl;
+        cout<<" 2. Salir"<<endl;
+        cout<<"---------------------------------"<<endl;
+        cout<<" Ingrese su opcion: ";
+        cin>>op;
+
+        switch(op){
+            /*     Iniciar session   */
+            case 1:
+                iniciarSesion();
+                break;
+            /*     SALIR   */ 
+            case 2:
+                menu = opcionSalir();
+                break;
+                
+        }
+    }while(menu==404);
+
+}
+
+void menuPrincpal(char type[4]){
     int op, menu=404;
     char des;
 
     do{
         clrscr();
-        cout<<"--------- Menu Principal --------"<<endl;
-        cout<<"     Bienvenido "<< nameGlobal<<"! "<<endl;
-        cout<<"---------------------------------"<<endl;
-        cout<<" 1. Gestion de Usuarios"<<endl;
-        cout<<" 2. Lista Enlazada"<<endl;
-        cout<<" 3. Lista Doblemente Enlazada"<<endl;
-        cout<<" 4. Pilas"<<endl;
-        cout<<" 5. Salir"<<endl;
-        cout<<"---------------------------------"<<endl;
-        cout<<" Ingrese su opcion: ";
-        cin>>op;
-    }while(true);
+        if(strcmp(type,"mecr")==0){
+            cout<<"--------- Menu Principal --------"<<endl;
+            cout<<" Bienvenido a Reparaciones: "<< nameGlobal<<endl;
+            cout<<"---------------------------------"<<endl;
+            cout<<" 1. "<<endl;
+            cout<<" 2. Lista Enlazada"<<endl;
+            cout<<" 3. Lista Doblemente Enlazada"<<endl;
+            cout<<" 4. Pilas"<<endl;
+            cout<<" 5. Salir"<<endl;
+            cout<<"---------------------------------"<<endl;
+            cout<<" Ingrese su opcion: "; 
+            cin>> op;    
+        }else if(strcmp(type,"mecm")==0){
+            cout<<"--------- Menu Principal --------"<<endl;
+            cout<<" Bienvenido a Mantenimiento: "<< nameGlobal<<endl;
+            cout<<"---------------------------------"<<endl;
+            cout<<" 1. "<<endl;
+            cout<<" 2. Lista Enlazada"<<endl;
+            cout<<" 3. Lista Doblemente Enlazada"<<endl;
+            cout<<" 4. Pilas"<<endl;
+            cout<<" 5. Salir"<<endl;
+            cout<<"---------------------------------"<<endl;
+            cout<<" Ingrese su opcion: "; 
+            cin>> op;
+
+        }else if(strcmp(type,"qya")==0){
+            cout<<"--------- Menu Principal --------"<<endl;
+            cout<<" Bienvenido a "<<nameGlobal<<endl;
+            cout<<"---------------------------------"<<endl;
+            cout<<" 1. "<<endl;
+            cout<<" 2. Lista Enlazada"<<endl;
+            cout<<" 3. Lista Doblemente Enlazada"<<endl;
+            cout<<" 4. Pilas"<<endl;
+            cout<<" 5. Salir"<<endl;
+            cout<<"---------------------------------"<<endl;
+            cout<<" Ingrese su opcion: "; 
+            cin>> op;
+        }else if(strcmp(type,"rec")==0){
+            cout<<"--------- Menu Principal --------"<<endl;
+            cout<<" Bienvenido a "<<nameGlobal<<endl;
+            cout<<"---------------------------------"<<endl;
+            cout<<" 1. "<<endl;
+            cout<<" 2. Lista Enlazada"<<endl;
+            cout<<" 3. Lista Doblemente Enlazada"<<endl;
+            cout<<" 4. Pilas"<<endl;
+            cout<<" 5. Salir"<<endl;
+            cout<<"---------------------------------"<<endl;
+            cout<<" Ingrese su opcion: "; 
+            cin>> op;
+        }else{
+            cout<<"----------------------------------------"<<endl;
+            cout<<" ERROR: No se ha reconocido su puesto,\npor favor contacte al administrador "; 
+            cout<<"----------------------------------------"<<endl;
+        }
+        system("pause");
+        
+    }while(menu==400);
+}
+
+int opcionSalir(){
+    int menu;
+    char des;
+    cout<<"Esta seguro que desea salir? S/N: ";
+    cin>>des;
+    /*  menu 400: sale del programa.
+        menu 404: regresa al menu principal.
+        menu 504: opcion no reconocida, pregunta nuevamente si desea salir.
+    */
+
+    if(des=='s' || des=='S'){
+    menu=400;
+    }else if(des=='n' || des=='N'){
+    menu=404;
+    }else{
+    cout<<"Opcion ingresada no es valida!"<<endl;
+    menu=504;
+    }
+    return menu;
 }

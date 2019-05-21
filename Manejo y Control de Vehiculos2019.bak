@@ -15,6 +15,7 @@ struct RegUsusario{
 
 //Declaracion de variables globales, funciones y metodos
 char typeGlobal[3], nameGlobal[15];
+char typeGlobal[3], nameGlobal[15]={' '};
 
 void iniciarSesion();
 int verificarUsuario(char promptUser[20], char promptPassword[16]);
