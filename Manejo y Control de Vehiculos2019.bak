@@ -14,7 +14,6 @@ struct RegUsusario{
 }userList, userAux;
 
 //Declaracion de variables globales, funciones y metodos
-char typeGlobal[3], nameGlobal[15];
 char typeGlobal[3], nameGlobal[15]={' '};
 
 void iniciarSesion();
