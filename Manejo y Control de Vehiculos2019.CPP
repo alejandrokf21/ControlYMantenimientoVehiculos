@@ -21,37 +21,29 @@ int verificarUsuario(char promptUser[20], char promptPassword[16]);
 int opcionSalir();
 void menuInicial();
 void menuPrincpal(char type[4]);
+void agregarArchivo();
 
+/*-----------------------------------------------------------------------
+                            INICIO DEL PROGRAMA
+-----------------------------------------------------------------------*/
 
 main(){
-   /*FILE *fp;
-   int i=0;
-    fp = fopen("users.dat","a+b");
-    clrscr();
-    do
-    {
-        cout<<"Ingrese el nuevo usuario: ";
-        cin>>userList.user;
-        cout<<"Ingrese el nombre: ";
-        gets(userList.name);
-        cout<<"Ingrese la contraseña: ";
-        cin>>userList.password;
-        cout<<"Ingrese Tipo de usuario: ";
-        cin>>userList.type;
-        fwrite(&userList, sizeof(userList), 1, fp);
-         i++;
-    } while (i<8);
-    fclose(fp); */
-	menuInicial();
+   	menuInicial();
 }
 
-void iniciarSesion(){
-   char promptUser[20], promptPassword[16]={0}, op, c;
-   int menu=400, ver, contador=0,i=0;
 
-  FILE *fp;
-   fp=fopen("users.dat", "r+b");
-  //do{
+/*-----------------------------------------------------------------------
+                            FUNCIONES GENERALES
+-----------------------------------------------------------------------*/
+
+void iniciarSesion(){
+    char promptUser[20], op, c;
+    string promptPassword;
+    int menu=400, ver, contador=0,i=0;
+
+    FILE *fp;
+    fp=fopen("users.dat", "r+b");
+
     if(fp==NULL){
         cout<<"+------------------------------------------------------------------+"<<endl;
         cout<<" ERROR: El archivo 'users.dat' no se ha podido encontrar.\nAsegurese de incluir la extension del archivo y que este sea .dat.\n\n";
@@ -71,7 +63,7 @@ void iniciarSesion(){
         }
         fclose(fp);
     }else{
-        clrscr();
+        system("CLS");
         menu=400;
         //----->Codigo a borrar
         fread(&userList, sizeof(userList), 1, fp);
@@ -81,23 +73,23 @@ void iniciarSesion(){
         }
 
         do{
-        		i=0 ;
+        	i=0 ;
             cout<<"+-----------------------------------------+"<<endl;
             cout<<"|            INICIO DE SESION             |"<<endl;
             cout<<"+-----------------------------------------+"<<endl;
             cout<<" Usuario: ";
             cin>>promptUser;
             cout<<" Contrasena: ";
-            memset( promptPassword, 0, 16 );
-            while((c=_getch())!=13) {
-                promptPassword[i] = c;
+            c = _getch();
+            while(c!=13) {
+                promptPassword.push_back(c);
                 putch('*');
-                i++;
+                c = _getch();
             }
             cout<<"+-----------------------------------------+"<<endl;
             ver = verificarUsuario(promptUser, promptPassword);
             if(ver!=1 && contador<3){
-                clrscr();
+                system("CLS");
                 cout<<"Error: Usuario o contraseña invalidos. Le quedan "<<(3-contador)<<" intentos."<<endl;
                 contador++;
             }else if(contador==3){
@@ -105,7 +97,7 @@ void iniciarSesion(){
                 contador++;
             }else{
                 //entra al menu();
-                clrscr();
+                system("CLS");
                 fclose(fp);
                 menuPrincpal(typeGlobal);
                 contador=4;
@@ -115,7 +107,7 @@ void iniciarSesion(){
     fclose(fp);
 }
 
-//Valida el usuario y contraseña ingresado
+///////////////------------Valida el usuario y contraseña ingresado
 int verificarUsuario(char promptUser[20], char promptPassword[16]){
     int compUser, compPass;
     bool found =true;
@@ -145,7 +137,7 @@ void menuInicial(){
     int op, menu=404;
 
     do{
-        clrscr();
+        system("CLS");
         cout<<"---------------------------------"<<endl;
         cout<<"         MENU INICIAL  "<<endl;
         cout<<"---------------------------------"<<endl;
@@ -158,6 +150,7 @@ void menuInicial(){
         switch(op){
             /*     Iniciar session   */
             case 1:
+                system("CLS");
                 iniciarSesion();
                 break;
             /*     SALIR   */ 
@@ -174,21 +167,24 @@ void menuPrincpal(char type[4]){
     int op, menu=404;
     char des;
 
+    system("CLS");
     do{
-        clrscr();
+        system("CLS");
         if(strcmp(type,"mecr")==0){
+            system("CLS");
             cout<<"--------- Menu Principal --------"<<endl;
             cout<<" Bienvenido a Reparaciones: "<< nameGlobal<<endl;
             cout<<"---------------------------------"<<endl;
-            cout<<" 1. "<<endl;
-            cout<<" 2. Lista Enlazada"<<endl;
-            cout<<" 3. Lista Doblemente Enlazada"<<endl;
+            cout<<" 1. Ver Tabla de Ordenes"<<endl;
+            cout<<" 2. Dar salida a vehiculo"<<endl;
+            cout<<" 3. Ver puntos obtenidos"<<endl;
             cout<<" 4. Pilas"<<endl;
             cout<<" 5. Salir"<<endl;
             cout<<"---------------------------------"<<endl;
             cout<<" Ingrese su opcion: "; 
             cin>> op;    
         }else if(strcmp(type,"mecm")==0){
+            system("CLS");
             cout<<"--------- Menu Principal --------"<<endl;
             cout<<" Bienvenido a Mantenimiento: "<< nameGlobal<<endl;
             cout<<"---------------------------------"<<endl;
@@ -202,6 +198,7 @@ void menuPrincpal(char type[4]){
             cin>> op;
 
         }else if(strcmp(type,"qya")==0){
+            system("CLS");
             cout<<"--------- Menu Principal --------"<<endl;
             cout<<" Bienvenido a "<<nameGlobal<<endl;
             cout<<"---------------------------------"<<endl;
@@ -214,6 +211,7 @@ void menuPrincpal(char type[4]){
             cout<<" Ingrese su opcion: "; 
             cin>> op;
         }else if(strcmp(type,"rec")==0){
+            system("CLS");
             cout<<"--------- Menu Principal --------"<<endl;
             cout<<" Bienvenido a "<<nameGlobal<<endl;
             cout<<"---------------------------------"<<endl;
@@ -226,6 +224,7 @@ void menuPrincpal(char type[4]){
             cout<<" Ingrese su opcion: "; 
             cin>> op;
         }else{
+            system("CLS");
             cout<<"----------------------------------------"<<endl;
             cout<<" ERROR: No se ha reconocido su puesto,\npor favor contacte al administrador "; 
             cout<<"----------------------------------------"<<endl;
@@ -255,3 +254,28 @@ int opcionSalir(){
     }
     return menu;
 }
+
+void agregarArchivo(){
+    FILE *fp;
+   int i=0;
+    fp = fopen("users.dat","a+b");
+    system("CLS");
+    do
+    {
+        cout<<"Ingrese el nuevo usuario: ";
+        cin>>userList.user;
+        cout<<"Ingrese el nombre: ";
+        gets(userList.name);
+        cout<<"Ingrese la contraseña: ";
+        cin>>userList.password;
+        cout<<"Ingrese Tipo de usuario: ";
+        cin>>userList.type;
+        fwrite(&userList, sizeof(userList), 1, fp);
+         i++;
+    } while (i<8);
+    fclose(fp);
+}
+
+/*-----------------------------------------------------------------------
+                            FUNCIONES GENERALES
+-----------------------------------------------------------------------*/
