@@ -7,7 +7,7 @@
 
 struct RegUsusario{
 
-	char user[10];
+    char user[10];
     char name[18];
     char password[16];
     char type[4];
@@ -28,7 +28,7 @@ void agregarArchivo();
 -----------------------------------------------------------------------*/
 
 main(){
-   	menuInicial();
+    menuInicial();
 }
 
 
@@ -37,7 +37,7 @@ main(){
 -----------------------------------------------------------------------*/
 
 void iniciarSesion(){
-    char promptUser[20], promptPassword[16]={0}, op, c;
+    char promptUser[20], promptPassword[16], op, c;
     int menu=400, ver, contador=0,i=0;
 
     FILE *fp;
@@ -72,14 +72,17 @@ void iniciarSesion(){
         }
 
         do{
-        	i=0 ;
+            i=0 ;
+            fflush(stdin);
+            fflush(stdout);
             cout<<"+-----------------------------------------+"<<endl;
             cout<<"|            INICIO DE SESION             |"<<endl;
             cout<<"+-----------------------------------------+"<<endl;
             cout<<" Usuario: ";
             cin>>promptUser;
             cout<<" Contrasena: ";
-            memset( promptPassword, 0, 16 );
+            //promptPassword[0]=0;
+            memset( promptPassword, 0,sizeof(promptPassword));
             while((c=_getch())!=13) {
                 promptPassword[i] = c;
                 putch('*');
