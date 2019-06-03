@@ -13,7 +13,7 @@ struct NodeMaintenance{
     char make[15];
     int model;
     char line[15];
-    char type[3];
+    char type[4];
     struct NodeMaintenance *sigMnt;
 } *iniMaint=NULL, *ultMaint=NULL, *auxMaint;
 
@@ -25,7 +25,7 @@ struct NodeRepair{
     char makeRep[15];
     int modelRep;
     char lineRep[15];
-    char typeRep[3];
+    char typeRep[4];
     struct NodeRepair *sigRep;
 } *iniRep=NULL, *ultRep=NULL, *auxRep;
 
@@ -38,7 +38,7 @@ struct ControlCalidad{
     char makeControl[15];
     int modelControl;
     char lineControl[15];
-    char typeControl[3];
+    char typeControl[4];
     char mecanicoControl[10];
     struct ControlCalidad *sigControl;
 }*iniControl=NULL, *ultControl=NULL, *auxControl;
@@ -51,7 +51,7 @@ struct ColaDeVuelta{
     char makeDeVuelta[15];
     int modelDeVuelta;
     char lineDeVuelta[15];
-    char typeDeVuelta[3];
+    char typeDeVuelta[4];
     char mecanicoDeVuelta[10];
     struct ColaDeVuelta *sigDeVuelta;
 }*iniDeVuelta=NULL, *ultDeVuelta=NULL, *auxDeVuelta;
@@ -65,7 +65,7 @@ struct SalidaDeVehiculo{
    char makeSalida[15];
    int modelSalida;
    char lineSalida[15];
-   char typeSalida[3];
+   char typeSalida[4];
    char mecanicoSalida[10];
    struct SalidaDeVehiculo *sigSalida;
 }*iniSalida=NULL, *ultSalida=NULL, *auxSalida;
@@ -78,7 +78,7 @@ struct NodeMecA{
     char makeMecA[15];
     int modelMecA;
     char lineMecA[15];
-    char typeMecA[3];
+    char typeMecA[4];
     char userMecA[10];
     struct NodeMecA *sigMecA;
 } *iniMecA=NULL, *ultMecA=NULL, *auxMecA;
@@ -91,7 +91,7 @@ struct NodeMecB{
     char makeMecB[15];
     int modelMecB;
     char lineMecB[15];
-    char typeMecB[3];
+    char typeMecB[4];
     char userMecB[10];
     struct NodeMecB *sigMecB;
 } *iniMecB=NULL, *ultMecB=NULL, *auxMecB;
@@ -104,7 +104,7 @@ struct NodeMecC{
     char makeMecC[15];
     int modelMecC;
     char lineMecC[15];
-    char typeMecC[3];
+    char typeMecC[4];
     char userMecC[10];
     struct NodeMecC *sigMecC;
 } *iniMecC=NULL, *ultMecC=NULL, *auxMecC;
@@ -117,7 +117,7 @@ struct NodeMecX{
     char makeMecX[15];
     int modelMecX;
     char lineMecX[15];
-    char typeMecX[3];
+    char typeMecX[4];
     char userMecX[10];
     struct NodeMecX *sigMecX;
 } *iniMecX=NULL, *ultMecX=NULL, *auxMecX;
@@ -130,7 +130,7 @@ struct NodeMecY{
     char makeMecY[15];
     int modelMecY;
     char lineMecY[15];
-    char typeMecY[3];
+    char typeMecY[4];
     char userMecY[10];
     struct NodeMecY *sigMecY;
 } *iniMecY=NULL, *ultMecY=NULL, *auxMecY;
@@ -143,7 +143,7 @@ struct NodeMecZ{
     char makeMecZ[15];
     int modelMecZ;
     char lineMecZ[15];
-    char typeMecZ[3];
+    char typeMecZ[4];
     char userMecZ[10];
     struct NodeMecZ *sigMecZ;
 } *iniMecZ=NULL, *ultMecZ=NULL, *auxMecZ;
@@ -198,7 +198,7 @@ void deleteMecY();
 void deleteMecZ();
 void displayMecanico();
 void agregarCalidad();
-void agregarOrdCalidad(int orden, char description[100], char plate[8], char make[15], int model, char line[15], char type[3]);
+void agregarOrdCalidad(int orden, char description[100], char plate[8], char make[15], int model, char line[15], char type[4]);
 void menuMecanico();
 void MenuControlDeCalidad();
 void buscarOrdenControl(int opBuscar);
@@ -253,13 +253,22 @@ void iniciarSesion(){
             cout<<" Contrasena: ";
             memset( promptPassword, 0,sizeof(promptPassword));
             for(i=0; i<16; i++){
-                if((c=getch())!=13){
+                c=getch();
+                if(c!=13 && c!=8){
                     promptPassword[i]=c;
                     cout<<'*';
-                }else
+                }else if(c==13){
                     break;
+                }else if(c==8 && promptPassword[0] != '\0'){
+                    cout<<"\b \b";
+                    i--;
+                    promptPassword[i] = '\0';
+                    i--;
+                }else{
+                    //break;
+                }
             }
-            cout<<"+-----------------------------------------+"<<endl;
+            cout<<endl<<"+-----------------------------------------+"<<endl;
             ver = verificarUsuario(promptUser, promptPassword);
             if(ver!=1 && contador<3){
                 system("CLS");
@@ -574,7 +583,52 @@ void agregarOrdMnt(char description[100],char plate[8], char make[15], int model
 }
 
 void buscarOrden(int noOrder){
+    char op1;
+    bool found=false;
     
+    auxSalida=iniSalida;
+
+    if (auxSalida!=NULL){
+        while(auxSalida!=NULL){
+            if(noOrder == auxSalida->orderSalida){
+                cout<<endl<<endl<<"--------------------------------------------------------"<<endl;
+                cout<<" Numero de Orden: "<<auxSalida->orderSalida<<endl;
+                cout<<" Tipo: "<<auxSalida->typeSalida<<endl;
+                cout<<" Marca: "<<auxSalida->makeSalida<<endl;
+                cout<<" Linea: "<<auxSalida->lineSalida<<endl;
+                cout<<" Modelo: "<<auxSalida->modelSalida<<endl;
+                cout<<" Placa: "<<auxSalida->plateSalida<<endl;
+                cout<<" Mecanico: "<<auxSalida->mecanicoSalida<<endl;
+                cout<<" Estado: "<<auxSalida->statusSAlida<<endl;
+                cout<<" Descripcion: "<<auxSalida->descriptionSalida<<endl;
+                cout<<"--------------------------------------------------------"<<endl;
+                cout<<" Desea dar Salida a esta orden? S/N: ";
+                cin>>op1;
+
+                if((op1=='S') || (op1=='s')){
+                    strcpy(auxSalida->statusSAlida, "Orden Entregada");
+                    cout<<endl<<"--------------------------------------------------------"<<endl;
+                    cout<<" Orden Entregada, que tenga un buen dia "<<endl;
+                    cout<<"--------------------------------------------------------"<<endl;
+                    system("pause");                    
+                }
+                found=true;
+                return;
+            }
+            auxSalida=auxSalida->sigSalida;
+        }
+        if(auxSalida==NULL && found==false){
+            cout<<endl<<endl<<"--------------------------------------------------------------------------------------------"<<endl;
+            cout<<" No se encontro la orden No.'"<<noOrder<<"'. La orden aun no se encuentra disponible para entrega."<<endl;
+            cout<<"--------------------------------------------------------------------------------------------"<<endl;
+            system("pause");
+        }else{
+            cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
+            cout<<" ERROR: No existe ninguna orden en lista para entrega, lista vacia."<<endl;
+            cout<<"-------------------------------------------------------------------------------"<<endl;
+            system("pause");
+        }
+    }    
 }
 
 void repartirOrden(){
@@ -868,7 +922,7 @@ void agregarOrdC(){
 }
 void agregarOrdX(){
     auxMecX = new NodeMecX;
-    auxMecX->orderMecX = ultRep->orderRep;
+    auxMecX->orderMecX = ultMaint->order;
     strcpy(auxMecX->statusMecX, "En Mantenimiento");
     strcpy(auxMecX->descriptionMecX, ultMaint->description);
     strcpy(auxMecX->plateMecX, ultMaint->plate);
@@ -889,7 +943,7 @@ void agregarOrdX(){
 }
 void agregarOrdY(){
     auxMecY = new NodeMecY;
-    auxMecY->orderMecY = ultRep->orderRep;
+    auxMecY->orderMecY = ultMaint->order;
     strcpy(auxMecY->statusMecY, "En Mantenimiento");
     strcpy(auxMecY->descriptionMecY, ultMaint->description);
     strcpy(auxMecY->plateMecY, ultMaint->plate);
@@ -911,7 +965,7 @@ void agregarOrdY(){
 
 void agregarOrdZ(){
     auxMecZ = new NodeMecZ;
-    auxMecZ->orderMecZ = ultRep->orderRep;
+    auxMecZ->orderMecZ = ultMaint->order;
     strcpy(auxMecZ->statusMecZ, "En Mantenimiento");
     strcpy(auxMecZ->descriptionMecZ, ultMaint->description);
     strcpy(auxMecZ->plateMecZ, ultMaint->plate);
@@ -1128,7 +1182,7 @@ void agregarCalidad(){
     }
 }
 
-void agregarOrdCalidad(int orden, char description[100], char plate[8], char make[15], int model, char line[15], char type[3]){
+void agregarOrdCalidad(int orden, char description[100], char plate[8], char make[15], int model, char line[15], char type[4]){
     auxControl = new ControlCalidad;
     auxControl->orderControl = orden;
     strcpy(auxControl->statusControl, "En Control de Calidad");
@@ -1471,6 +1525,7 @@ void MenuControlDeCalidad(){
 
 void buscarOrdenControl(int opBuscar){
     char op1;
+    bool found=false;
     
     auxControl=iniControl;
 
@@ -1507,19 +1562,21 @@ void buscarOrdenControl(int opBuscar){
                         system("pause");
                     }
                 }
-
-            }else{
-                cout<<endl<<endl<<"--------------------------------------------------------------------------------------------"<<endl;
-                cout<<" No se encontro la orden No.'"<<opBuscar<<"'. La orden no se encuentra en control de calidad."<<endl;
-                cout<<"--------------------------------------------------------------------------------------------"<<endl;
-                system("pause");
+                found=true;
+                return;
             }
             auxControl=auxControl->sigControl;
         }
-    }else{
-        cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
-        cout<<" ERROR: No existe ninguna orden en control de Calidad, lista vacia."<<endl;
-        cout<<"-------------------------------------------------------------------------------"<<endl;
-        system("pause");
+        if(auxControl==NULL && found==false){
+            cout<<endl<<endl<<"--------------------------------------------------------------------------------------------"<<endl;
+            cout<<" No se encontro la orden No.'"<<opBuscar<<"'. La orden no se encuentra en control de calidad."<<endl;
+            cout<<"--------------------------------------------------------------------------------------------"<<endl;
+            system("pause");
+        }else{
+            cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
+            cout<<" ERROR: No existe ninguna orden en control de Calidad, lista vacia."<<endl;
+            cout<<"-------------------------------------------------------------------------------"<<endl;
+            system("pause");
+        }
     }
 }

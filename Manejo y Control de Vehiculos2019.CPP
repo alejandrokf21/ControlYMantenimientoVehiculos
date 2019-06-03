@@ -190,6 +190,9 @@ void mostrarMecX();
 void mostrarMecY();
 void mostrarMecZ();
 void mostrarControl();
+void mostrarSalidaTodas();
+void mostrarSalidaRecoger();
+void mostrarListaentrega();
 void deleteMecA();
 void deleteMecB();
 void deleteMecC();
@@ -253,13 +256,22 @@ void iniciarSesion(){
             cout<<" Contrasena: ";
             memset( promptPassword, 0,sizeof(promptPassword));
             for(i=0; i<16; i++){
-                if((c=getch())!=13){
+                c=getch();
+                if(c!=13 && c!=8){
                     promptPassword[i]=c;
                     cout<<'*';
-                }else
+                }else if(c==13){
                     break;
+                }else if(c==8 && promptPassword[0] != '\0'){
+                    cout<<"\b \b";
+                    i--;
+                    promptPassword[i] = '\0';
+                    i--;
+                }else{
+                    //break;
+                }
             }
-            cout<<"+-----------------------------------------+"<<endl;
+            cout<<endl<<"+-----------------------------------------+"<<endl;
             ver = verificarUsuario(promptUser, promptPassword);
             if(ver!=1 && contador<3){
                 system("CLS");
@@ -418,6 +430,7 @@ void agregarArchivo(){
 void menuRepeccion(){
     int op, menu=404,model, i=0, noOrder;
     char description[100]={' '}, plate[8]={' '}, make[15]={' '}, line[15]={' '};
+    bool ver=true;
 
     do{
         system("CLS");
@@ -426,9 +439,9 @@ void menuRepeccion(){
         cout<<"-------------------------------------"<<endl;
         cout<<" 1. Ingresar a Reparacion"<<endl;
         cout<<" 2. Ingresar a Mantenimiento"<<endl;
-        cout<<" 3. Buscar Orden"<<endl;
+        cout<<" 3. Entregar Orden mediante Busqueda"<<endl;
         cout<<" 4. Listado de Ordenes para Entregar"<<endl;
-        cout<<" 5. Total de Ordenes"<<endl;//cambiar a ver reporte 
+        cout<<" 5. Reporteria"<<endl;//cambiar a ver reporte 
         cout<<" 6. Cerrar Sesion"<<endl;
         cout<<"-------------------------------------"<<endl;
         cout<<" Ingrese la opcion: ";
@@ -476,21 +489,87 @@ void menuRepeccion(){
             case 3:
                 /* BUSCAR OREN */
                 system("CLS");
-                cout<<"-------------------------------------"<<endl;
-                cout<<"     Busqueda de Orden"<<endl;
-                cout<<"-------------------------------------"<<endl;
-                cout<<" Ingrese el numero de orden: ";
-                cin>>noOrder;
+                if (auxSalida==NULL){
+                    cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
+                    cout<<" ERROR: No existe ninguna orden en lista para entrega, lista vacia."<<endl;
+                    cout<<"-------------------------------------------------------------------------------"<<endl;
+                    system("pause");
+                }else{
+                    cout<<"-------------------------------------"<<endl;
+                    cout<<"     Busqueda de Orden"<<endl;
+                    cout<<"-------------------------------------"<<endl;
+                    cout<<" Ingrese el numero de orden: ";
+                    cin>>noOrder;
 
-                buscarOrden(noOrder);
-                system("pause");
+                    buscarOrden(noOrder);
+                    system("pause");
+                }
+                
                 break;
             case 4:
                 /* LISTADO DE VHICULOS A ENTREGAR */
+                mostrarListaentrega();
                 break;
             case 5:
-                /* Total de Ordenes */
-                totalOrdenes();
+                /* Reporteria */
+                do{//Primer Do
+                    system("CLS");
+                    cout<<"---------------------------------"<<endl;
+                    cout<<"            Reporteria   "<<endl;
+                    cout<<"---------------------------------"<<endl;
+                    cout<<" 1. Cantidad de puntos obtenidos"<<endl;
+                    cout<<" 2. Ver Produccion"<<endl;
+                    cout<<" 3. Ver Todo"<<endl;
+                    cout<<" 4. Volver a menu principal"<<endl;
+                    cout<<"-------------------------------------"<<endl;
+                    cout<<" Ingrese la opcion: ";
+                    cin>>op;
+
+                    switch(op){
+                        case 1:
+                            break;
+                        case 2:
+                            /* Ver Produccion */
+                            system("CLS");
+                            cout<<"---------------------------------"<<endl;
+                            cout<<"          Ver Produccion   "<<endl;
+                            cout<<"---------------------------------"<<endl;
+                            cout<<" 1. Mecanicos por cantidad de ordenes Recibidas"<<endl;
+                            cout<<" 2. Mecanicos por cantidad de ordenes Revisadas"<<endl;
+                            cout<<" 3. Salir"<<endl;
+                            cout<<"-------------------------------------"<<endl;
+                            cout<<" Ingrese la opcion: ";
+                            cin>>op;
+
+                            if(op==1){
+                                /* Mecanicos por cantidad de ordenes Recibidas */
+
+                            }else if(op==2){
+                                /* Mecanicos por cantidad de ordenes Revisadas*/
+
+                            }else if(op==3){
+                                /* Salir*/
+
+                            }else{
+                                cout<<endl<<" ERROR: La opcion ingresada no es valida, por favor intente de nuevo."<<endl;
+                                system("pause");
+                            }
+                            break;
+                        case 3:
+                            /* Total de Ordenes */
+                            totalOrdenes();
+                            break;
+                        case 4:
+                            /* Volver al menu principal*/ 
+                            menuRepeccion();
+                            break;
+                        default:
+                            cout<<endl<<" ERROR: La opcion ingresada no es valida, por favor intente de nuevo."<<endl;
+                            system("pause");
+                            break;
+                    }
+
+                }while(ver); //Primer Do                
                 break;
             case 6:
                 /* CERRAR SESION*/
@@ -574,7 +653,52 @@ void agregarOrdMnt(char description[100],char plate[8], char make[15], int model
 }
 
 void buscarOrden(int noOrder){
+    char op1;
+    bool found=false;
     
+    auxSalida=iniSalida;
+
+    if (auxSalida!=NULL){
+        while(auxSalida!=NULL){
+            if(noOrder == auxSalida->orderSalida){
+                cout<<endl<<endl<<"--------------------------------------------------------"<<endl;
+                cout<<" Numero de Orden: "<<auxSalida->orderSalida<<endl;
+                cout<<" Tipo: "<<auxSalida->typeSalida<<endl;
+                cout<<" Marca: "<<auxSalida->makeSalida<<endl;
+                cout<<" Linea: "<<auxSalida->lineSalida<<endl;
+                cout<<" Modelo: "<<auxSalida->modelSalida<<endl;
+                cout<<" Placa: "<<auxSalida->plateSalida<<endl;
+                cout<<" Mecanico: "<<auxSalida->mecanicoSalida<<endl;
+                cout<<" Estado: "<<auxSalida->statusSAlida<<endl;
+                cout<<" Descripcion: "<<auxSalida->descriptionSalida<<endl;
+                cout<<"--------------------------------------------------------"<<endl;
+                cout<<" Desea dar Salida a esta orden? S/N: ";
+                cin>>op1;
+
+                if((op1=='S') || (op1=='s')){
+                    strcpy(auxSalida->statusSAlida, "Orden Entregada");
+                    cout<<endl<<"--------------------------------------------------------"<<endl;
+                    cout<<" Orden Entregada, que tenga un buen dia "<<endl;
+                    cout<<"--------------------------------------------------------"<<endl;
+                    system("pause");                    
+                }
+                found=true;
+                return;
+            }
+            auxSalida=auxSalida->sigSalida;
+        }
+        if(auxSalida==NULL && found==false){
+            cout<<endl<<endl<<"--------------------------------------------------------------------------------------------"<<endl;
+            cout<<" No se encontro la orden No.'"<<noOrder<<"'. La orden aun no se encuentra disponible para entrega."<<endl;
+            cout<<"--------------------------------------------------------------------------------------------"<<endl;
+            system("pause");
+        }
+    }else{
+        cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
+        cout<<" ERROR: No existe ninguna orden en lista para entrega, lista vacia."<<endl;
+        cout<<"-------------------------------------------------------------------------------"<<endl;
+        system("pause");
+    }    
 }
 
 void repartirOrden(){
@@ -766,6 +890,28 @@ void mostrarControl(){
         }
     }
 }
+void mostrarSalidaRecoger(){
+    auxSalida=iniSalida;
+    if (iniSalida==NULL){
+        return;
+    }else{ 
+        while(auxSalida!=NULL  && (strcmp(auxSalida->statusSAlida,"Orden Lista")==0)){
+            cout<<auxSalida->orderSalida<<"\t\t"<<auxSalida->typeSalida<<"\t"<<auxSalida->makeSalida<<"\t"<<auxSalida->lineSalida<<"\t"<<auxSalida->modelSalida<<"\t"<<auxSalida->plateSalida<<"\t"<<auxSalida->statusSAlida<<endl;
+            auxSalida=auxSalida->sigSalida;
+        }
+    }
+}
+void mostrarSalidaTodas(){
+    auxSalida=iniSalida;
+    if (iniSalida==NULL){
+        return;
+    }else{ 
+        while(auxSalida!=NULL ){
+            cout<<auxSalida->orderSalida<<"\t\t"<<auxSalida->typeSalida<<"\t"<<auxSalida->makeSalida<<"\t"<<auxSalida->lineSalida<<"\t"<<auxSalida->modelSalida<<"\t"<<auxSalida->plateSalida<<"\t"<<auxSalida->statusSAlida<<endl;
+            auxSalida=auxSalida->sigSalida;
+        }
+    }
+}
 
 void deleteRepQueue() {
    auxRep = iniRep;
@@ -935,18 +1081,37 @@ void totalOrdenes(){
     system("CLS");
     cout<<"  No. Orden\t"<<"Tipo\t"<<"Fabricante\t"<<"Linea\t"<<"Modelo\t"<<"No. Placa\t"<<"Estado\t"<<"Usuario"<<endl;
     cout<<"-------------------------------------------------------------------------------------------------------"<<endl;
-    mostrarRep();
-    mostrarMnt();
-    mostrarMecA();
-    mostrarMecB();
-    mostrarMecC();
-    mostrarMecX();
-    mostrarMecY();
-    mostrarMecZ();
-    mostrarControl();
+    if(iniSalida==NULL && iniControl==NULL && iniDeVuelta==NULL && iniMaint==NULL && iniRep==NULL && iniMecA==NULL && iniMecB==NULL && iniMecC==NULL && iniMecX==NULL && iniMecY==NULL && iniMecZ==NULL){
+        cout<<"No existe ninguna orden para trabajar, lista vacia.\n";
+    }else{
+        mostrarRep();
+        mostrarMnt();
+        mostrarMecA();
+        mostrarMecB();
+        mostrarMecC();
+        mostrarMecX();
+        mostrarMecY();
+        mostrarMecZ();
+        mostrarControl();
+        mostrarSalidaTodas();
+    }    
     cout<<"----------------------------------------- Ultima Linea-------------------------------------------------"<<endl;
     system("pause");
 }
+
+void mostrarListaentrega(){
+    system("CLS");
+    cout<<"  No. Orden\t"<<"Tipo\t"<<"Fabricante\t"<<"Linea\t"<<"Modelo\t"<<"No. Placa\t"<<"Estado\t"<<"Usuario"<<endl;
+    cout<<"-------------------------------------------------------------------------------------------------------"<<endl;
+    if(iniSalida!=NULL){
+        mostrarSalidaRecoger();
+    }else{
+        cout<<"No hay ordenes pendientes de entrega, lista vacia.\n";
+    }
+    cout<<"----------------------------------------- Ultima Linea-------------------------------------------------"<<endl;
+    system("pause");    
+}
+
 
 /*-----------------------------------------------------------------------
                             FUNCIONES MECANICOS
@@ -963,7 +1128,7 @@ void menuMecanico(){
         cout<<"---------------------------------"<<endl;
         cout<<" 1. Ver Ordenes"<<endl;
         cout<<" 2. Terminar Orden"<<endl;
-        cout<<" 3. Ver Reporte"<<endl;
+        cout<<" 3. Ver Reportes"<<endl;
         cout<<" 4. Cerrar Sesion"<<endl;
         cout<<"-------------------------------------"<<endl;
         cout<<" Ingrese la opcion: ";
@@ -1062,7 +1227,23 @@ void menuMecanico(){
 
             case 3:
                 /* VER REPORTE DE PUNTOS, CANT ODRS EN REPARACION, CANT ORDRS EN QA, CANT ORDRS LISTAS PARA RECO, TOT VEHICULOS REVISADOS */
+                do{
+                    system("CLS");
+                    cout<<"---------------------------------"<<endl;
+                    cout<<"     Reporteria Mecanico  "<<endl;
+                    cout<<"---------------------------------"<<endl;
+                    cout<<" 1. Cantidad de puntos obtenidos"<<endl;
+                    cout<<" 2. Cantidad de Ordenes en Reparacion"<<endl;
+                    cout<<" 3. Cantidad de Ordenes en Control de Calidad"<<endl;
+                    cout<<" 4. Cantidad de Ordenes listas para Recoger"<<endl;
+                    cout<<" 5. Total de Vehiculos Revisados"<<endl;
+                    cout<<" 6. Volver al menu principal"<<endl;
+                    cout<<"-------------------------------------"<<endl;
+                    cout<<" Ingrese la opcion: ";
+                    cin>>op;
                 
+                }while(true);
+                break;                
             case 4:                
                 repartirOrdenRep();
                 menu = opcionSalir();
@@ -1518,11 +1699,11 @@ void buscarOrdenControl(int opBuscar){
             cout<<" No se encontro la orden No.'"<<opBuscar<<"'. La orden no se encuentra en control de calidad."<<endl;
             cout<<"--------------------------------------------------------------------------------------------"<<endl;
             system("pause");
-        }else{
-            cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
-            cout<<" ERROR: No existe ninguna orden en control de Calidad, lista vacia."<<endl;
-            cout<<"-------------------------------------------------------------------------------"<<endl;
-            system("pause");
         }
+    }else{
+        cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
+        cout<<" ERROR: No existe ninguna orden en control de Calidad, lista vacia."<<endl;
+        cout<<"-------------------------------------------------------------------------------"<<endl;
+        system("pause");
     }
 }
