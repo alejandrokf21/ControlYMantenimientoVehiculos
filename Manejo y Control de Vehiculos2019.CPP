@@ -42,6 +42,7 @@ struct ControlCalidad{
     char mecanicoControl[10];
     struct ControlCalidad *sigControl;
 }*iniControl=NULL, *ultControl=NULL, *auxControl;
+
 //Cola para Ordenes de vuelta
 struct ColaDeVuelta{
     int orderDeVuelta;
@@ -205,6 +206,11 @@ void agregarOrdCalidad(int orden, char description[100], char plate[8], char mak
 void menuMecanico();
 void MenuControlDeCalidad();
 void buscarOrdenControl(int opBuscar);
+void AgregarSalidaVehiculos();
+void EliminarControlCalidad();
+void sacarOrdenControl();
+void EliminarControlCalidadPorBusqueda();
+void AgregarColaDeVuelta();
 
 /*-----------------------------------------------------------------------
                             INICIO DEL PROGRAMA
@@ -560,8 +566,8 @@ void menuRepeccion(){
                             totalOrdenes();
                             break;
                         case 4:
-                            /* Volver al menu principal*/ 
-                            menuRepeccion();
+                            /* Volver al menu principal*/
+                            ver=false;
                             break;
                         default:
                             cout<<endl<<" ERROR: La opcion ingresada no es valida, por favor intente de nuevo."<<endl;
@@ -574,6 +580,7 @@ void menuRepeccion(){
             case 6:
                 /* CERRAR SESION*/
                 repartirOrdenRep();
+                ver=false;
                 menu = opcionSalir();
                 break;
             default:
@@ -1613,9 +1620,10 @@ void MenuControlDeCalidad(){
         system("CLS");
         cout<<"            Control de Calidad            \n";
         cout<<"|----------------------------------------|\n";
-        cout<<"|  1.          Buscar Orden              |\n";
-        cout<<"|  2.          Validar Orden             |\n";
-        cout<<"|  3.    Salir de Control de Calidad     |\n";
+        cout<<"|  1.         Buscar Orden               |\n";
+        cout<<"|  2.          Sacar Orden               |\n";
+        cout<<"|  3. Mostrar Lista Control de Calidad   |\n";
+        cout<<"|  4.    Salir de Control de Calidad     |\n";
         cout<<"|----------------------------------------|\n";
         cout<<"Ingrese codigo del menu: ";
         cin>>opControl;
@@ -1635,10 +1643,23 @@ void MenuControlDeCalidad(){
                 break;
 
              case 2:
-                
+                    sacarOrdenControl();
                 break;
 
-             case 3:
+            case 3:
+                system("CLS");
+                cout<<"  No. Orden\t"<<"Tipo\t"<<"Fabricante\t"<<"Linea\t"<<"Modelo\t"<<"No. Placa\t"<<"Estado\t"<<"Usuario"<<endl;
+                cout<<"-------------------------------------------------------------------------------------------------------"<<endl;
+                if(iniControl==NULL ){
+                    cout<<"No existe ninguna orden en control de calidad, lista vacia.\n";
+                }else{
+                    mostrarControl();
+                }    
+                cout<<"----------------------------------------- Ultima Linea-------------------------------------------------"<<endl;
+                system("pause");
+                break;
+
+             case 4:
                 menu=opcionSalir();
                 break;
 
@@ -1680,10 +1701,21 @@ void buscarOrdenControl(int opBuscar){
 
                     if((op1=='S') || (op1=='s')){
                         //mandar a lista salida
-                        //eliminar de lista control
+                        AgregarSalidaVehiculos();                        
+                        cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
+                        cout<<" Orden No.: "<<auxControl->orderControl<<" esta lista para ser entregada. "<<endl;
+                        cout<<"-------------------------------------------------------------------------------"<<endl;
+                        system("pause");
+                        EliminarControlCalidadPorBusqueda();
                     }else if((op1=='N') || (op1=='n')){
                         //madar a cola de incalidad
+                        AgregarColaDeVuelta();
+                        cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
+                        cout<<" Orden No.: "<<auxControl->orderControl<<" no cumple con los estandares de calidad.\nOrden devuelta a mecanico: "<<auxControl->mecanicoControl<<". "<<endl;
+                        cout<<"-------------------------------------------------------------------------------"<<endl;
+                        system("pause");
                         //eliminar de lista control
+                        EliminarControlCalidadPorBusqueda();
                     }else{
                         cout<<" ERROR: Opcion ingresada es invalida"<<endl;
                         system("pause");
@@ -1707,3 +1739,126 @@ void buscarOrdenControl(int opBuscar){
         system("pause");
     }
 }
+
+void sacarOrdenControl(){
+    char op1;
+
+    if (iniControl!=NULL){
+        cout<<endl<<endl<<"--------------------------------------------------------"<<endl;
+        cout<<" Numero de Orden: "<<iniControl->orderControl<<endl;
+        cout<<" Tipo: "<<iniControl->typeControl<<endl;
+        cout<<" Marca: "<<iniControl->makeControl<<endl;
+        cout<<" Linea: "<<iniControl->lineControl<<endl;
+        cout<<" Modelo: "<<iniControl->modelControl<<endl;
+        cout<<" Placa: "<<iniControl->plateControl<<endl;
+        cout<<" Mecanico: "<<iniControl->mecanicoControl<<endl;
+        cout<<" Estado: "<<iniControl->statusControl<<endl;
+        cout<<" Descripcion: "<<iniControl->descriptionControl<<endl;
+        cout<<"--------------------------------------------------------"<<endl;
+        cout<<" Esta orden cumple con los estandares de calidad? S/N: ";
+        cin>>op1;
+
+        if((op1=='S') || (op1=='s')){
+            //mandar a lista salida
+            AgregarSalidaVehiculos();                        
+            cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
+            cout<<" Orden No.: "<<iniControl->orderControl<<" esta lista para ser entregada. "<<endl;
+            cout<<"-------------------------------------------------------------------------------"<<endl;
+            system("pause");
+            EliminarControlCalidad();
+        }else if((op1=='N') || (op1=='n')){
+            //madar a cola de incalidad
+            AgregarColaDeVuelta();
+            cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
+            cout<<" Orden No.: "<<iniControl->orderControl<<" no cumple con los estandares de calidad.\nOrden devuelta a mecanico: "<<iniControl->mecanicoControl<<". "<<endl;
+            cout<<"-------------------------------------------------------------------------------"<<endl;
+            system("pause");
+            //eliminar de lista
+            EliminarControlCalidad();
+        }else{
+            cout<<" ERROR: Opcion ingresada es invalida"<<endl;
+            system("pause");
+        }
+    }else{
+        cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
+        cout<<" ERROR: No existe ninguna orden en control de Calidad, lista vacia."<<endl;
+        cout<<"-------------------------------------------------------------------------------"<<endl;
+        system("pause");
+    }
+}
+
+void AgregarSalidaVehiculos(){
+    auxSalida = new SalidaDeVehiculo;
+    auxSalida->orderSalida = iniControl->orderControl;
+    strcpy(auxSalida->statusSAlida, "Orden Lista");
+    strcpy(auxSalida->descriptionSalida, iniControl->descriptionControl);
+    strcpy(auxSalida->plateSalida, iniControl->plateControl);
+    strcpy(auxSalida->makeSalida, iniControl->makeControl);
+    auxSalida->modelSalida= iniControl->modelControl;
+    strcpy(auxSalida->lineSalida,iniControl->lineControl);
+    strcpy(auxSalida->typeSalida,iniControl->typeControl);
+    strcpy(auxSalida->mecanicoSalida,iniControl->mecanicoControl);
+
+    if(iniSalida == NULL){
+        iniSalida = ultSalida = auxSalida;
+        auxSalida->sigSalida = NULL;
+    }else{
+        auxSalida->sigSalida=NULL;
+        ultSalida->sigSalida=auxSalida;
+        ultSalida=auxSalida;
+    }
+}
+
+void EliminarControlCalidad() {
+   auxControl = iniControl;
+   if (iniControl == NULL) {
+      return;
+   }
+   else if (auxControl->sigControl != NULL) {
+      auxControl = auxControl->sigControl;
+      free(iniControl);
+      iniControl = auxControl;
+   } else {
+      free(iniControl);
+      iniControl = NULL;
+      ultControl = NULL;
+   }
+}
+
+void EliminarControlCalidadPorBusqueda() {
+   ControlCalidad *ptr = iniControl;
+                       
+   if (auxControl == ptr) {
+      iniControl=iniControl->sigControl;
+      free(auxControl);
+   }else{
+       while(ptr->sigControl!=auxControl){
+           ptr=ptr->sigControl;
+       }
+       ptr->sigControl=auxControl->sigControl;
+       free(auxControl);
+   }
+}
+
+void AgregarColaDeVuelta(){
+    auxDeVuelta = new ColaDeVuelta;
+    auxDeVuelta->orderDeVuelta = iniControl->orderControl;
+    strcpy(auxDeVuelta->statusDeVuelta, "Orden Incalidad");
+    strcpy(auxDeVuelta->descriptionDeVuelta, iniControl->descriptionControl);
+    strcpy(auxDeVuelta->plateDeVuelta, iniControl->plateControl);
+    strcpy(auxDeVuelta->makeDeVuelta, iniControl->makeControl);
+    auxDeVuelta->modelDeVuelta= iniControl->modelControl;
+    strcpy(auxDeVuelta->lineDeVuelta,iniControl->lineControl);
+    strcpy(auxDeVuelta->typeDeVuelta,iniControl->typeControl);
+    strcpy(auxDeVuelta->mecanicoDeVuelta,iniControl->mecanicoControl);
+
+    if(iniDeVuelta == NULL){
+        iniDeVuelta = ultDeVuelta = auxDeVuelta;
+        auxDeVuelta->sigDeVuelta = NULL;
+    }else{
+        auxDeVuelta->sigDeVuelta=NULL;
+        ultDeVuelta->sigDeVuelta=auxDeVuelta;
+        ultDeVuelta=auxDeVuelta;
+    }
+}
+
