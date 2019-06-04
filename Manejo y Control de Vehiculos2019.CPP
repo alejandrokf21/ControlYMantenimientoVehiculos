@@ -173,6 +173,8 @@ void agregarOrdRep(char description[100],char plate[8], char make[15], int model
 void agregarOrdMnt(char description[100],char plate[8], char make[15], int model, char line[15]);
 void repartirOrdenMnt();
 void repartirOrdenRep();
+void repartirOrden();
+void repartirOrdIncalidad();
 void deleteMntQueue();
 void deleteRepQueue();
 void agregarOrdA();
@@ -194,12 +196,14 @@ void mostrarControl();
 void mostrarSalidaTodas();
 void mostrarSalidaRecoger();
 void mostrarListaentrega();
+void mostrarIncalidad();
 void deleteMecA();
 void deleteMecB();
 void deleteMecC();
 void deleteMecX();
 void deleteMecY();
 void deleteMecZ();
+void eliminarIncalidad();
 void displayMecanico();
 void agregarCalidad();
 void agregarOrdCalidad(int orden, char description[100], char plate[8], char make[15], int model, char line[15], char type[4]);
@@ -439,6 +443,7 @@ void menuRepeccion(){
     bool ver=true;
 
     do{
+        repartirOrden();
         system("CLS");
         cout<<"-------------------------------------"<<endl;
         cout<<"     Menu Recepcion"<<endl;
@@ -471,7 +476,7 @@ void menuRepeccion(){
                 gets(description);
 
                 agregarOrdRep(description, plate, make, model, line);
-                repartirOrdenRep();
+                repartirOrden();
                 break;
             case 2:
                 system("CLS");
@@ -490,17 +495,13 @@ void menuRepeccion(){
                 gets(description);
 
                 agregarOrdMnt(description, plate, make, model, line);
-                repartirOrdenMnt();
+                repartirOrden();
                 break;
             case 3:
                 /* BUSCAR OREN */
                 system("CLS");
-                if (auxSalida==NULL){
-                    cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
-                    cout<<" ERROR: No existe ninguna orden en lista para entrega, lista vacia."<<endl;
-                    cout<<"-------------------------------------------------------------------------------"<<endl;
-                    system("pause");
-                }else{
+                auxSalida=iniSalida;
+                if (auxSalida!=NULL){
                     cout<<"-------------------------------------"<<endl;
                     cout<<"     Busqueda de Orden"<<endl;
                     cout<<"-------------------------------------"<<endl;
@@ -508,6 +509,10 @@ void menuRepeccion(){
                     cin>>noOrder;
 
                     buscarOrden(noOrder);
+                }else{
+                    cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
+                    cout<<" ERROR: No existe ninguna orden en lista para entrega, lista vacia."<<endl;
+                    cout<<"-------------------------------------------------------------------------------"<<endl;
                     system("pause");
                 }
                 
@@ -579,7 +584,7 @@ void menuRepeccion(){
                 break;
             case 6:
                 /* CERRAR SESION*/
-                repartirOrdenRep();
+                repartirOrden();
                 ver=false;
                 menu = opcionSalir();
                 break;
@@ -667,7 +672,7 @@ void buscarOrden(int noOrder){
 
     if (auxSalida!=NULL){
         while(auxSalida!=NULL){
-            if(noOrder == auxSalida->orderSalida){
+            if(noOrder == auxSalida->orderSalida && strcmp(auxSalida->statusSAlida, "Orden Lista")){
                 cout<<endl<<endl<<"--------------------------------------------------------"<<endl;
                 cout<<" Numero de Orden: "<<auxSalida->orderSalida<<endl;
                 cout<<" Tipo: "<<auxSalida->typeSalida<<endl;
@@ -687,7 +692,7 @@ void buscarOrden(int noOrder){
                     cout<<endl<<"--------------------------------------------------------"<<endl;
                     cout<<" Orden Entregada, que tenga un buen dia "<<endl;
                     cout<<"--------------------------------------------------------"<<endl;
-                    system("pause");                    
+                    system("pause");
                 }
                 found=true;
                 return;
@@ -705,15 +710,183 @@ void buscarOrden(int noOrder){
         cout<<" ERROR: No existe ninguna orden en lista para entrega, lista vacia."<<endl;
         cout<<"-------------------------------------------------------------------------------"<<endl;
         system("pause");
-    }    
+    }
 }
 
 void repartirOrden(){
     /* 1. Validar si existe alguna en cola de descalidad*/
     /* 2. Agragrar a cola de mec correspondiente*/
     //repartirOrdencONTROL();
+    repartirOrdIncalidad();
     repartirOrdenRep();
     repartirOrdenMnt();
+}
+
+void agregarIncalidadMecA(){
+    auxMecA = new NodeMecA;
+    auxMecA->orderMecA = auxDeVuelta->orderDeVuelta;
+    strcpy(auxMecA->statusMecA, "En Reparacion");
+    strcpy(auxMecA->descriptionMecA, auxDeVuelta->descriptionDeVuelta);
+    strcpy(auxMecA->plateMecA, auxDeVuelta->plateDeVuelta);
+    strcpy(auxMecA->makeMecA, auxDeVuelta->makeDeVuelta);
+    auxMecA->modelMecA= auxDeVuelta->modelDeVuelta;
+    strcpy(auxMecA->lineMecA,auxDeVuelta->lineDeVuelta);
+    strcpy(auxMecA->typeMecA,auxDeVuelta->typeDeVuelta);
+    strcpy(auxMecA->userMecA,auxDeVuelta->mecanicoDeVuelta);
+
+    if(iniMecA == NULL){
+        iniMecA = ultMecA = auxMecA;
+        auxMecA->sigMecA = NULL;
+    }else{
+        auxMecA->sigMecA=NULL;
+        ultMecA->sigMecA=auxMecA;
+        ultMecA=auxMecA;
+    }
+}
+
+void agregarIncalidadMecB(){
+    auxMecB = new NodeMecB;
+    auxMecB->orderMecB = auxDeVuelta->orderDeVuelta;
+    strcpy(auxMecB->statusMecB, "En Reparacion");
+    strcpy(auxMecB->descriptionMecB, auxDeVuelta->descriptionDeVuelta);
+    strcpy(auxMecB->plateMecB, auxDeVuelta->plateDeVuelta);
+    strcpy(auxMecB->makeMecB, auxDeVuelta->makeDeVuelta);
+    auxMecB->modelMecB= auxDeVuelta->modelDeVuelta;
+    strcpy(auxMecB->lineMecB,auxDeVuelta->lineDeVuelta);
+    strcpy(auxMecB->typeMecB,auxDeVuelta->typeDeVuelta);
+    strcpy(auxMecB->userMecB,auxDeVuelta->mecanicoDeVuelta);
+
+    if(iniMecB == NULL){
+        iniMecB = ultMecB = auxMecB;
+        auxMecB->sigMecB = NULL;
+    }else{
+        auxMecB->sigMecB=NULL;
+        ultMecB->sigMecB=auxMecB;
+        ultMecB=auxMecB;
+    }
+}
+
+void agregarIncalidadMecC(){
+    auxMecC = new NodeMecC;
+    auxMecC->orderMecC = auxDeVuelta->orderDeVuelta;
+    strcpy(auxMecC->statusMecC, "En Reparacion");
+    strcpy(auxMecC->descriptionMecC, auxDeVuelta->descriptionDeVuelta);
+    strcpy(auxMecC->plateMecC, auxDeVuelta->plateDeVuelta);
+    strcpy(auxMecC->makeMecC, auxDeVuelta->makeDeVuelta);
+    auxMecC->modelMecC= auxDeVuelta->modelDeVuelta;
+    strcpy(auxMecC->lineMecC,auxDeVuelta->lineDeVuelta);
+    strcpy(auxMecC->typeMecC,auxDeVuelta->typeDeVuelta);
+    strcpy(auxMecC->userMecC,auxDeVuelta->mecanicoDeVuelta);
+
+    if(iniMecC == NULL){
+        iniMecC = ultMecC = auxMecC;
+        auxMecC->sigMecC = NULL;
+    }else{
+        auxMecC->sigMecC=NULL;
+        ultMecC->sigMecC=auxMecC;
+        ultMecC=auxMecC;
+    }
+}
+
+void agregarIncalidadMecX(){
+    auxMecX = new NodeMecX;
+    auxMecX->orderMecX = auxDeVuelta->orderDeVuelta;
+    strcpy(auxMecX->statusMecX, "En Mantenimiento");
+    strcpy(auxMecX->descriptionMecX, auxDeVuelta->descriptionDeVuelta);
+    strcpy(auxMecX->plateMecX, auxDeVuelta->plateDeVuelta);
+    strcpy(auxMecX->makeMecX, auxDeVuelta->makeDeVuelta);
+    auxMecX->modelMecX= auxDeVuelta->modelDeVuelta;
+    strcpy(auxMecX->lineMecX,auxDeVuelta->lineDeVuelta);
+    strcpy(auxMecX->typeMecX,auxDeVuelta->typeDeVuelta);
+    strcpy(auxMecX->userMecX,auxDeVuelta->mecanicoDeVuelta);
+
+    if(iniMecX == NULL){
+        iniMecX = ultMecX = auxMecX;
+        auxMecX->sigMecX = NULL;
+    }else{
+        auxMecX->sigMecX=NULL;
+        ultMecX->sigMecX=auxMecX;
+        ultMecX=auxMecX;
+    }
+}
+
+void agregarIncalidadMecY(){
+    auxMecY = new NodeMecY;
+    auxMecY->orderMecY = auxDeVuelta->orderDeVuelta;
+    strcpy(auxMecY->statusMecY, "En Mantenimiento");
+    strcpy(auxMecY->descriptionMecY, auxDeVuelta->descriptionDeVuelta);
+    strcpy(auxMecY->plateMecY, auxDeVuelta->plateDeVuelta);
+    strcpy(auxMecY->makeMecY, auxDeVuelta->makeDeVuelta);
+    auxMecY->modelMecY= auxDeVuelta->modelDeVuelta;
+    strcpy(auxMecY->lineMecY,auxDeVuelta->lineDeVuelta);
+    strcpy(auxMecY->typeMecY,auxDeVuelta->typeDeVuelta);
+    strcpy(auxMecY->userMecY,auxDeVuelta->mecanicoDeVuelta);
+
+    if(iniMecY == NULL){
+        iniMecY = ultMecY = auxMecY;
+        auxMecY->sigMecY = NULL;
+    }else{
+        auxMecY->sigMecY=NULL;
+        ultMecY->sigMecY=auxMecY;
+        ultMecY=auxMecY;
+    }
+}
+
+void agregarIncalidadMecZ(){
+    auxMecZ = new NodeMecZ;
+    auxMecZ->orderMecZ = auxDeVuelta->orderDeVuelta;
+    strcpy(auxMecZ->statusMecZ, "En Mantenimiento");
+    strcpy(auxMecZ->descriptionMecZ, auxDeVuelta->descriptionDeVuelta);
+    strcpy(auxMecZ->plateMecZ, auxDeVuelta->plateDeVuelta);
+    strcpy(auxMecZ->makeMecZ, auxDeVuelta->makeDeVuelta);
+    auxMecZ->modelMecZ= auxDeVuelta->modelDeVuelta;
+    strcpy(auxMecZ->lineMecZ,auxDeVuelta->lineDeVuelta);
+    strcpy(auxMecZ->typeMecZ,auxDeVuelta->typeDeVuelta);
+    strcpy(auxMecZ->userMecZ,auxDeVuelta->mecanicoDeVuelta);
+
+    if(iniMecZ == NULL){
+        iniMecZ = ultMecZ = auxMecZ;
+        auxMecZ->sigMecZ = NULL;
+    }else{
+        auxMecZ->sigMecZ=NULL;
+        ultMecZ->sigMecZ=auxMecZ;
+        ultMecZ=auxMecZ;
+    }
+}
+
+void repartirOrdIncalidad(){
+    auxDeVuelta = iniDeVuelta;
+    if(iniDeVuelta!=NULL){
+        while(auxDeVuelta!=NULL){
+            if((strcmp(auxDeVuelta->mecanicoDeVuelta, "meca")==0) && countNodeMecA<5){ 
+                agregarIncalidadMecA();
+                eliminarIncalidad(); 
+                countNodeMecA++;               
+            }else if((strcmp(auxDeVuelta->mecanicoDeVuelta, "mecb")==0) && countNodeMecB<5){
+                agregarIncalidadMecB();
+                eliminarIncalidad(); 
+                countNodeMecB++;
+            }else if((strcmp(auxDeVuelta->mecanicoDeVuelta, "mecc")==0) && countNodeMecC<5){
+                agregarIncalidadMecC();
+                eliminarIncalidad(); 
+                countNodeMecC++;
+            }else if((strcmp(auxDeVuelta->mecanicoDeVuelta, "mecx")==0) && countNodeMecX<5){
+                agregarIncalidadMecX();
+                eliminarIncalidad(); 
+                countNodeMecX++;
+            }else if((strcmp(auxDeVuelta->mecanicoDeVuelta, "mecy")==0) && countNodeMecY<5){
+                agregarIncalidadMecY();
+                eliminarIncalidad(); 
+                countNodeMecY++;
+            }else if((strcmp(auxDeVuelta->mecanicoDeVuelta, "mecz")==0) && countNodeMecZ<5){
+                agregarIncalidadMecZ();
+                eliminarIncalidad(); 
+                countNodeMecZ++;
+            }
+            if(auxDeVuelta!=NULL)
+            auxDeVuelta = auxDeVuelta->sigDeVuelta;
+        }
+    }
 }
 
 void repartirOrdenRep(){
@@ -920,6 +1093,18 @@ void mostrarSalidaTodas(){
     }
 }
 
+void mostrarIncalidad(){
+    auxDeVuelta=iniDeVuelta;
+    if (iniDeVuelta==NULL){
+        return;
+    }else{ 
+        while(auxDeVuelta!=NULL ){
+            cout<<auxDeVuelta->orderDeVuelta<<"\t\t"<<auxDeVuelta->typeDeVuelta<<"\t"<<auxDeVuelta->makeDeVuelta<<"\t"<<auxDeVuelta->lineDeVuelta<<"\t"<<auxDeVuelta->modelDeVuelta<<"\t"<<auxDeVuelta->plateDeVuelta<<"\t"<<auxDeVuelta->statusDeVuelta<<endl;
+            auxDeVuelta=auxDeVuelta->sigDeVuelta;
+        }
+    }
+}
+
 void deleteRepQueue() {
    auxRep = iniRep;
    if (iniRep == NULL) {
@@ -1101,6 +1286,7 @@ void totalOrdenes(){
         mostrarMecZ();
         mostrarControl();
         mostrarSalidaTodas();
+        mostrarIncalidad();
     }    
     cout<<"----------------------------------------- Ultima Linea-------------------------------------------------"<<endl;
     system("pause");
@@ -1129,6 +1315,7 @@ void menuMecanico(){
     char op1;
 
     do{
+        repartirOrden();
         system("CLS");
         cout<<"--------- Menu Principal --------"<<endl;
         cout<<" Bienvenido: "<< nameGlobal<<endl;
@@ -1155,6 +1342,7 @@ void menuMecanico(){
                         cin>>op1;
                         if((op1=='S') || (op1=='s')){
                            agregarCalidad(); 
+                           repartirOrden();
                         }
                     }else{
                         cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
@@ -1168,6 +1356,7 @@ void menuMecanico(){
                         cin>>op1;
                         if((op1=='S') || (op1=='s')){
                            agregarCalidad(); 
+                           repartirOrden();
                         }
                     }else{
                         cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
@@ -1180,7 +1369,8 @@ void menuMecanico(){
                         cout<<"\n\nEsta seguro que ya termino la orden No.'"<<iniMecC->orderMecC<<"'?  S/N:";
                         cin>>op1;
                         if((op1=='S') || (op1=='s')){
-                           agregarCalidad(); 
+                           agregarCalidad();
+                           repartirOrden(); 
                         }
                     }else{
                         cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
@@ -1194,6 +1384,7 @@ void menuMecanico(){
                         cin>>op1;
                         if((op1=='S') || (op1=='s')){
                            agregarCalidad(); 
+                           repartirOrden();
                         }
                     }else{
                         cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
@@ -1207,6 +1398,7 @@ void menuMecanico(){
                         cin>>op1;
                         if((op1=='S') || (op1=='s')){
                            agregarCalidad(); 
+                           repartirOrden();
                         }
                     }else{
                         cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
@@ -1220,6 +1412,7 @@ void menuMecanico(){
                         cin>>op1;
                         if((op1=='S') || (op1=='s')){
                            agregarCalidad(); 
+                           repartirOrden();
                         }
                     }else{
                         cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
@@ -1252,7 +1445,7 @@ void menuMecanico(){
                 }while(true);
                 break;                
             case 4:                
-                repartirOrdenRep();
+                repartirOrden();
                 menu = opcionSalir();
                 break;
             default:
@@ -1455,7 +1648,7 @@ void displayMecanico(){
             cout<<" No tiene ninguna orden que trabajar, cola vacia."<<endl;
             cout<<"-------------------------------------------------------------------------------"<<endl;
             system("pause");
-        }else{ 
+        }else{
             system("CLS");
             cout<<"--------------------------------------------------------"<<endl;
             cout<<" \tOrdenes: "<<nameGlobal<<endl;
@@ -1481,7 +1674,7 @@ void displayMecanico(){
             cout<<" No tiene ninguna orden que trabajar, cola vacia."<<endl;
             cout<<"-------------------------------------------------------------------------------"<<endl;
             system("pause");
-        }else{ 
+        }else{
             system("CLS");
             cout<<"--------------------------------------------------------"<<endl;
             cout<<" \tOrdenes: "<<nameGlobal<<endl;
@@ -1507,7 +1700,7 @@ void displayMecanico(){
             cout<<" No tiene ninguna orden que trabajar, cola vacia."<<endl;
             cout<<"-------------------------------------------------------------------------------"<<endl;
             system("pause");
-        }else{ 
+        }else{
             system("CLS");
             cout<<"--------------------------------------------------------"<<endl;
             cout<<" \tOrdenes: "<<nameGlobal<<endl;
@@ -1525,7 +1718,7 @@ void displayMecanico(){
                 cout<<"--------------------------------------------------------"<<endl;
             }
             system("pause");
-        }        
+        }
     }else if(strcmp(userGlobal,"mecx")==0){
         auxMecX=iniMecX;
         if (iniMecX==NULL){
@@ -1533,7 +1726,7 @@ void displayMecanico(){
             cout<<" No tiene ninguna orden que trabajar, cola vacia."<<endl;
             cout<<"-------------------------------------------------------------------------------"<<endl;
             system("pause");
-        }else{ 
+        }else{
             system("CLS");
             cout<<"--------------------------------------------------------"<<endl;
             cout<<" \tOrdenes: "<<nameGlobal<<endl;
@@ -1559,7 +1752,7 @@ void displayMecanico(){
             cout<<" No tiene ninguna orden que trabajar, cola vacia."<<endl;
             cout<<"-------------------------------------------------------------------------------"<<endl;
             system("pause");
-        }else{ 
+        }else{
             system("CLS");
             cout<<"--------------------------------------------------------"<<endl;
             cout<<" \tOrdenes: "<<nameGlobal<<endl;
@@ -1585,7 +1778,7 @@ void displayMecanico(){
             cout<<" No tiene ninguna orden que trabajar, cola vacia."<<endl;
             cout<<"-------------------------------------------------------------------------------"<<endl;
             system("pause");
-        }else{ 
+        }else{
             system("CLS");
             cout<<"--------------------------------------------------------"<<endl;
             cout<<" \tOrdenes: "<<nameGlobal<<endl;
@@ -1612,7 +1805,7 @@ void displayMecanico(){
                             FUNCIONES CONTROL DE CALIDAD
 -----------------------------------------------------------------------*/
 
-//Procedimiento para menu de control de calidad 
+//Procedimiento para menu de control de calidad
 void MenuControlDeCalidad(){
    int opControl, menu=404, i=0, opBuscar;
    char op;
@@ -1640,10 +1833,12 @@ void MenuControlDeCalidad(){
                 cin>>opBuscar;
 
                 buscarOrdenControl(opBuscar);
+                //repartirOrden();
                 break;
 
              case 2:
                     sacarOrdenControl();
+                    //repartirOrden();
                 break;
 
             case 3:
@@ -1654,27 +1849,28 @@ void MenuControlDeCalidad(){
                     cout<<"No existe ninguna orden en control de calidad, lista vacia.\n";
                 }else{
                     mostrarControl();
-                }    
+                }
                 cout<<"----------------------------------------- Ultima Linea-------------------------------------------------"<<endl;
                 system("pause");
                 break;
 
              case 4:
-                menu=opcionSalir();
+                //repartirOrden();
+                menu=opcionSalir();                                    
                 break;
 
              default:
                 cout<<"\nERROR: Opcion ingresada no es valida, intente de nuevo... \n";
-                system("pause");            
+                system("pause");
                 break;
         }
    }while(menu==404);
-} 
+}
 
 void buscarOrdenControl(int opBuscar){
     char op1;
     bool found=false;
-    
+
     auxControl=iniControl;
 
     if (auxControl!=NULL){
@@ -1742,6 +1938,7 @@ void buscarOrdenControl(int opBuscar){
 
 void sacarOrdenControl(){
     char op1;
+    auxControl=iniControl;
 
     if (iniControl!=NULL){
         cout<<endl<<endl<<"--------------------------------------------------------"<<endl;
@@ -1789,15 +1986,15 @@ void sacarOrdenControl(){
 
 void AgregarSalidaVehiculos(){
     auxSalida = new SalidaDeVehiculo;
-    auxSalida->orderSalida = iniControl->orderControl;
+    auxSalida->orderSalida = auxControl->orderControl;
     strcpy(auxSalida->statusSAlida, "Orden Lista");
-    strcpy(auxSalida->descriptionSalida, iniControl->descriptionControl);
-    strcpy(auxSalida->plateSalida, iniControl->plateControl);
-    strcpy(auxSalida->makeSalida, iniControl->makeControl);
-    auxSalida->modelSalida= iniControl->modelControl;
-    strcpy(auxSalida->lineSalida,iniControl->lineControl);
-    strcpy(auxSalida->typeSalida,iniControl->typeControl);
-    strcpy(auxSalida->mecanicoSalida,iniControl->mecanicoControl);
+    strcpy(auxSalida->descriptionSalida, auxControl->descriptionControl);
+    strcpy(auxSalida->plateSalida, auxControl->plateControl);
+    strcpy(auxSalida->makeSalida, auxControl->makeControl);
+    auxSalida->modelSalida= auxControl->modelControl;
+    strcpy(auxSalida->lineSalida,auxControl->lineControl);
+    strcpy(auxSalida->typeSalida,auxControl->typeControl);
+    strcpy(auxSalida->mecanicoSalida,auxControl->mecanicoControl);
 
     if(iniSalida == NULL){
         iniSalida = ultSalida = auxSalida;
@@ -1842,15 +2039,15 @@ void EliminarControlCalidadPorBusqueda() {
 
 void AgregarColaDeVuelta(){
     auxDeVuelta = new ColaDeVuelta;
-    auxDeVuelta->orderDeVuelta = iniControl->orderControl;
+    auxDeVuelta->orderDeVuelta = auxControl->orderControl;
     strcpy(auxDeVuelta->statusDeVuelta, "Orden Incalidad");
-    strcpy(auxDeVuelta->descriptionDeVuelta, iniControl->descriptionControl);
-    strcpy(auxDeVuelta->plateDeVuelta, iniControl->plateControl);
-    strcpy(auxDeVuelta->makeDeVuelta, iniControl->makeControl);
-    auxDeVuelta->modelDeVuelta= iniControl->modelControl;
-    strcpy(auxDeVuelta->lineDeVuelta,iniControl->lineControl);
-    strcpy(auxDeVuelta->typeDeVuelta,iniControl->typeControl);
-    strcpy(auxDeVuelta->mecanicoDeVuelta,iniControl->mecanicoControl);
+    strcpy(auxDeVuelta->descriptionDeVuelta, auxControl->descriptionControl);
+    strcpy(auxDeVuelta->plateDeVuelta, auxControl->plateControl);
+    strcpy(auxDeVuelta->makeDeVuelta, auxControl->makeControl);
+    auxDeVuelta->modelDeVuelta= auxControl->modelControl;
+    strcpy(auxDeVuelta->lineDeVuelta,auxControl->lineControl);
+    strcpy(auxDeVuelta->typeDeVuelta,auxControl->typeControl);
+    strcpy(auxDeVuelta->mecanicoDeVuelta,auxControl->mecanicoControl);
 
     if(iniDeVuelta == NULL){
         iniDeVuelta = ultDeVuelta = auxDeVuelta;
@@ -1862,3 +2059,19 @@ void AgregarColaDeVuelta(){
     }
 }
 
+void eliminarIncalidad(){
+    ColaDeVuelta *ptr = iniDeVuelta;
+                       
+   if (auxDeVuelta == ptr) {
+      iniDeVuelta=iniDeVuelta->sigDeVuelta;
+      free(auxDeVuelta);
+      auxDeVuelta=iniDeVuelta;
+   }else{
+       while(ptr->sigDeVuelta!=auxDeVuelta){
+           ptr=ptr->sigDeVuelta;
+       }
+       ptr->sigDeVuelta=auxDeVuelta->sigDeVuelta;
+       free(auxDeVuelta);
+       auxDeVuelta=ptr;
+   }    
+}
