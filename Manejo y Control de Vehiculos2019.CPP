@@ -149,6 +149,12 @@ struct NodeMecZ{
     struct NodeMecZ *sigMecZ;
 } *iniMecZ=NULL, *ultMecZ=NULL, *auxMecZ;
 
+struct NodoPunteo{
+    char userPunteo[10]; 
+    int countPunteo;
+    struct NodoPunteo * sigPunteo;
+} *iniPunteo=NULL, *ultPunteo=NULL, *auxPunteo;
+
 struct RegUsusario{
     char user[10];
     char name[20];
@@ -158,7 +164,7 @@ struct RegUsusario{
 
 //Declaracion de variables globales, funciones y metodos
 char typeGlobal[5], nameGlobal[20]={' '}, userGlobal[10];
-int countRep=1, countMnt=1, countNodeMecA=0, countNodeMecB=0, countNodeMecC=0, countNodeMecX=0, countNodeMecY=0, countNodeMecZ=0;
+int countRep=1, countMnt=1, countNodeMecA=0, countNodeMecB=0, countNodeMecC=0, countNodeMecX=0, countNodeMecY=0, countNodeMecZ=0, ordRecMecA=0, ordRecMecB=0, ordRecMecC=0, ordRecMecX=0, ordRecMecY=0, ordRecMecZ=0;
 bool valA=true, valB=false, valC=false, valX=true, valY=false, valZ=false;
 
 void iniciarSesion();
@@ -215,6 +221,13 @@ void EliminarControlCalidad();
 void sacarOrdenControl();
 void EliminarControlCalidadPorBusqueda();
 void AgregarColaDeVuelta();
+void asignarPunteo(char user[10]);
+int verPunteo(char user[10]);
+void createUsersPunteo();
+void displaySortedPunteoList();
+void sortDescPunteo();
+void displayCantOrdRev(userGlobal);
+void displayCantOrdRec(userGlobal);
 
 /*-----------------------------------------------------------------------
                             INICIO DEL PROGRAMA
@@ -222,7 +235,8 @@ void AgregarColaDeVuelta();
 
 main(){
 //agregarArchivo();
-menuInicial();
+    createUsersPunteo();
+    menuInicial();
 }
 
 
@@ -452,7 +466,7 @@ void menuRepeccion(){
         cout<<" 2. Ingresar a Mantenimiento"<<endl;
         cout<<" 3. Entregar Orden mediante Busqueda"<<endl;
         cout<<" 4. Listado de Ordenes para Entregar"<<endl;
-        cout<<" 5. Reporteria"<<endl;//cambiar a ver reporte 
+        cout<<" 5. Reporteria"<<endl;//cambiar a ver reporte
         cout<<" 6. Cerrar Sesion"<<endl;
         cout<<"-------------------------------------"<<endl;
         cout<<" Ingrese la opcion: ";
@@ -515,7 +529,7 @@ void menuRepeccion(){
                     cout<<"-------------------------------------------------------------------------------"<<endl;
                     system("pause");
                 }
-                
+
                 break;
             case 4:
                 /* LISTADO DE VHICULOS A ENTREGAR */
@@ -538,6 +552,7 @@ void menuRepeccion(){
 
                     switch(op){
                         case 1:
+                            displaySortedPunteoList();
                             break;
                         case 2:
                             /* Ver Produccion */
@@ -554,10 +569,10 @@ void menuRepeccion(){
 
                             if(op==1){
                                 /* Mecanicos por cantidad de ordenes Recibidas */
-
+                                displayCantOrdRec(userGlobal);
                             }else if(op==2){
                                 /* Mecanicos por cantidad de ordenes Revisadas*/
-
+                                displayCantOrdRev(userGlobal);
                             }else if(op==3){
                                 /* Salir*/
 
@@ -580,7 +595,7 @@ void menuRepeccion(){
                             break;
                     }
 
-                }while(ver); //Primer Do                
+                }while(ver); //Primer Do
                 break;
             case 6:
                 /* CERRAR SESION*/
@@ -605,7 +620,7 @@ void agregarOrdRep(char description[100],char plate[8], char make[15], int model
     itoa(countRep,buffer,10);
     strcat(noOrder,buffer);
     countRep++;*/
-    
+
 
     auxRep = new NodeRepair;
     auxRep->orderRep= countRep;
@@ -625,7 +640,7 @@ void agregarOrdRep(char description[100],char plate[8], char make[15], int model
         ultRep->sigRep=auxRep;
         ultRep=auxRep;
     }
-    
+
     cout<<"---------------------------------------------------------------"<<endl;
     cout<<" Orden ingresada Exitosamente, su numero de orden es: "<<countRep<<endl;
     system("pause");
@@ -638,7 +653,7 @@ void agregarOrdMnt(char description[100],char plate[8], char make[15], int model
     itoa(countMnt,buffer,10);
     strcat(noOrder,buffer);
     countMnt++;*/
-    
+
     auxMaint = new NodeMaintenance;
     auxMaint->order = countRep;
     strcpy(auxMaint->status, "En Linea de Espera");
@@ -657,7 +672,7 @@ void agregarOrdMnt(char description[100],char plate[8], char make[15], int model
         ultMaint->sigMnt=auxMaint;
         ultMaint=auxMaint;
     }
-    
+
     cout<<"---------------------------------------------------------------"<<endl;
     cout<<" Orden ingresada Exitosamente, su numero de orden es: "<<countRep<<endl;
     system("pause");
@@ -667,12 +682,12 @@ void agregarOrdMnt(char description[100],char plate[8], char make[15], int model
 void buscarOrden(int noOrder){
     char op1;
     bool found=false;
-    
+
     auxSalida=iniSalida;
 
     if (auxSalida!=NULL){
         while(auxSalida!=NULL){
-            if(noOrder == auxSalida->orderSalida && strcmp(auxSalida->statusSAlida, "Orden Lista")){
+            if(noOrder == auxSalida->orderSalida && strcmp(auxSalida->statusSAlida, "Orden Lista")==0){
                 cout<<endl<<endl<<"--------------------------------------------------------"<<endl;
                 cout<<" Numero de Orden: "<<auxSalida->orderSalida<<endl;
                 cout<<" Tipo: "<<auxSalida->typeSalida<<endl;
@@ -701,7 +716,7 @@ void buscarOrden(int noOrder){
         }
         if(auxSalida==NULL && found==false){
             cout<<endl<<endl<<"--------------------------------------------------------------------------------------------"<<endl;
-            cout<<" No se encontro la orden No.'"<<noOrder<<"'. La orden aun no se encuentra disponible para entrega."<<endl;
+            cout<<" No se encontro la orden No.'"<<noOrder<<"'. La orden no se encuentra disponible para entrega."<<endl;
             cout<<"--------------------------------------------------------------------------------------------"<<endl;
             system("pause");
         }
@@ -859,26 +874,32 @@ void repartirOrdIncalidad(){
     if(iniDeVuelta!=NULL){
         while(auxDeVuelta!=NULL){
             if((strcmp(auxDeVuelta->mecanicoDeVuelta, "meca")==0) && countNodeMecA<5){ 
+                ordRecMecA--;
                 agregarIncalidadMecA();
                 eliminarIncalidad(); 
                 countNodeMecA++;               
             }else if((strcmp(auxDeVuelta->mecanicoDeVuelta, "mecb")==0) && countNodeMecB<5){
+                ordRecMecB--;
                 agregarIncalidadMecB();
                 eliminarIncalidad(); 
                 countNodeMecB++;
             }else if((strcmp(auxDeVuelta->mecanicoDeVuelta, "mecc")==0) && countNodeMecC<5){
+                ordRecMecC--;
                 agregarIncalidadMecC();
                 eliminarIncalidad(); 
                 countNodeMecC++;
             }else if((strcmp(auxDeVuelta->mecanicoDeVuelta, "mecx")==0) && countNodeMecX<5){
+                ordRecMecX--;
                 agregarIncalidadMecX();
                 eliminarIncalidad(); 
                 countNodeMecX++;
             }else if((strcmp(auxDeVuelta->mecanicoDeVuelta, "mecy")==0) && countNodeMecY<5){
+                ordRecMecY--;
                 agregarIncalidadMecY();
                 eliminarIncalidad(); 
                 countNodeMecY++;
             }else if((strcmp(auxDeVuelta->mecanicoDeVuelta, "mecz")==0) && countNodeMecZ<5){
+                ordRecMecZ--;
                 agregarIncalidadMecZ();
                 eliminarIncalidad(); 
                 countNodeMecZ++;
@@ -1140,6 +1161,7 @@ void deleteMntQueue() {
 }
 
 void agregarOrdA(){
+    ordRecMecA++;
     auxMecA = new NodeMecA;
     auxMecA->orderMecA = ultRep->orderRep;
     strcpy(auxMecA->statusMecA, "En Reparacion");
@@ -1162,6 +1184,7 @@ void agregarOrdA(){
 }
 
 void agregarOrdB(){
+    ordRecMecB++;
     auxMecB = new NodeMecB;
     auxMecB->orderMecB = ultRep->orderRep;
     strcpy(auxMecB->statusMecB, "En Reparacion");
@@ -1184,6 +1207,7 @@ void agregarOrdB(){
 }
 
 void agregarOrdC(){
+    ordRecMecB++;
     auxMecC = new NodeMecC;
     auxMecC->orderMecC = ultRep->orderRep;
     strcpy(auxMecC->statusMecC, "En Reparacion");
@@ -1205,6 +1229,7 @@ void agregarOrdC(){
     }
 }
 void agregarOrdX(){
+    ordRecMecX++;
     auxMecX = new NodeMecX;
     auxMecX->orderMecX = ultMaint->order;
     strcpy(auxMecX->statusMecX, "En Mantenimiento");
@@ -1226,6 +1251,7 @@ void agregarOrdX(){
     }
 }
 void agregarOrdY(){
+    ordRecMecY++;
     auxMecY = new NodeMecY;
     auxMecY->orderMecY = ultMaint->order;
     strcpy(auxMecY->statusMecY, "En Mantenimiento");
@@ -1248,6 +1274,7 @@ void agregarOrdY(){
 }
 
 void agregarOrdZ(){
+    ordRecMecZ++;
     auxMecZ = new NodeMecZ;
     auxMecZ->orderMecZ = ultMaint->order;
     strcpy(auxMecZ->statusMecZ, "En Mantenimiento");
@@ -1311,8 +1338,9 @@ void mostrarListaentrega(){
 -----------------------------------------------------------------------*/
 
 void menuMecanico(){
-    int op, menu=404,model, i=0;
+    int op, menu=404,model, i=0, puntosMec=0;
     char op1;
+    bool ver=true;
 
     do{
         repartirOrden();
@@ -1441,8 +1469,35 @@ void menuMecanico(){
                     cout<<"-------------------------------------"<<endl;
                     cout<<" Ingrese la opcion: ";
                     cin>>op;
+
+                    switch(op){
+                        case 1:
+                            puntosMec=verPunteo(userGlobal);
+                            cout<<endl<<endl<<"-------------------------------------------------------------------------------"<<endl;
+                            cout<<"Total de Puntos obtenidos: "<<puntosMec<<endl;
+                            cout<<"-------------------------------------------------------------------------------"<<endl;
+                            system("pause");
+                            break;
+                        case 2:
+                            break;
+                        case 3:
+                            break;
+                        case 4:
+                            break;
+                        case 5:
+                            
+                            break;
+                        case 6:
+                            ver=false;
+                            break;
+                        default:
+                            system("CLS");
+                            cout<<" ERROR: La opcion ingresada no es valida, por favor intente de nuevo."<<endl;
+                            system("pause");
+                            break;
+                    }                    
                 
-                }while(true);
+                }while(ver);
                 break;                
             case 4:                
                 repartirOrden();
@@ -1902,7 +1957,9 @@ void buscarOrdenControl(int opBuscar){
                         cout<<" Orden No.: "<<auxControl->orderControl<<" esta lista para ser entregada. "<<endl;
                         cout<<"-------------------------------------------------------------------------------"<<endl;
                         system("pause");
+                        asignarPunteo(auxControl->mecanicoControl);
                         EliminarControlCalidadPorBusqueda();
+                        
                     }else if((op1=='N') || (op1=='n')){
                         //madar a cola de incalidad
                         AgregarColaDeVuelta();
@@ -1962,6 +2019,7 @@ void sacarOrdenControl(){
             cout<<" Orden No.: "<<iniControl->orderControl<<" esta lista para ser entregada. "<<endl;
             cout<<"-------------------------------------------------------------------------------"<<endl;
             system("pause");
+            asignarPunteo(auxControl->mecanicoControl);
             EliminarControlCalidad();
         }else if((op1=='N') || (op1=='n')){
             //madar a cola de incalidad
@@ -2061,7 +2119,7 @@ void AgregarColaDeVuelta(){
 
 void eliminarIncalidad(){
     ColaDeVuelta *ptr = iniDeVuelta;
-                       
+
    if (auxDeVuelta == ptr) {
       iniDeVuelta=iniDeVuelta->sigDeVuelta;
       free(auxDeVuelta);
@@ -2074,4 +2132,134 @@ void eliminarIncalidad(){
        free(auxDeVuelta);
        auxDeVuelta=ptr;
    }    
+}
+
+void asignarPunteo(char user[10]){
+    auxPunteo = iniPunteo;
+
+    while(auxPunteo!=NULL){
+       if(strcmp(user, auxPunteo->userPunteo)==0){
+            auxPunteo->countPunteo = auxPunteo->countPunteo + 5;
+        }else if(strcmp(user, auxPunteo->userPunteo)==0){
+            auxPunteo->countPunteo = auxPunteo->countPunteo + 5;
+        }else if(strcmp(user, auxPunteo->userPunteo)==0){
+            auxPunteo->countPunteo = auxPunteo->countPunteo + 5;
+        }else if(strcmp(user, auxPunteo->userPunteo)==0){
+            auxPunteo->countPunteo = auxPunteo->countPunteo + 5;
+        }else if(strcmp(user, auxPunteo->userPunteo)==0){
+            auxPunteo->countPunteo = auxPunteo->countPunteo + 5;
+        }else if(strcmp(user, auxPunteo->userPunteo)==0){
+            auxPunteo->countPunteo = auxPunteo->countPunteo + 5;
+        }  
+        auxPunteo = auxPunteo->sigPunteo;
+    }  
+}
+
+int verPunteo(char user[10]){
+    auxPunteo = iniPunteo;
+
+    while(auxPunteo!=NULL){
+       if(strcmp(user, auxPunteo->userPunteo)==0){
+            return auxPunteo->countPunteo;
+        }else if(strcmp(user, auxPunteo->userPunteo)==0){
+            return auxPunteo->countPunteo;
+        }else if(strcmp(user, auxPunteo->userPunteo)==0){
+            return auxPunteo->countPunteo;
+        }else if(strcmp(user, auxPunteo->userPunteo)==0){
+            return auxPunteo->countPunteo;
+        }else if(strcmp(user, auxPunteo->userPunteo)==0){
+            return auxPunteo->countPunteo;
+        }else if(strcmp(user, auxPunteo->userPunteo)==0){
+            return auxPunteo->countPunteo;
+        }  
+        auxPunteo = auxPunteo->sigPunteo;
+    }    
+}
+
+void createUsersPunteo(){
+    char users[6][10] = {"meca", "mecb", "mecc","mecx","mecy","mecz"};  
+      
+    // Printing Strings stored in 2D array  
+    for (int i = 0; i < 6; i++){
+        auxPunteo = new NodoPunteo;
+        strcpy(auxPunteo->userPunteo, users[i]);
+        auxPunteo->countPunteo= 0;
+
+        if(iniPunteo == NULL){
+            iniPunteo = ultPunteo = auxPunteo;
+            auxPunteo->sigPunteo = NULL;
+        }else{
+            auxPunteo->sigPunteo=NULL;
+            ultPunteo->sigPunteo=auxPunteo;
+            ultPunteo=auxPunteo;
+        }
+    }  
+}
+
+void sortDescPunteo(){
+    NodoPunteo *ptr = iniPunteo;
+    int tempcountPunteo;
+    char tempuserPunteo[10];
+    int counter = 0;
+    while (ptr)
+    {
+        ptr = ptr->sigPunteo;
+        counter++;
+    }
+    ptr = iniPunteo;
+
+    for (int j=0; j<counter; j++)
+    {
+        while (ptr->sigPunteo)
+        {
+            if (ptr->countPunteo < ptr->sigPunteo->countPunteo)
+            {
+                tempcountPunteo = ptr->countPunteo;
+                ptr->countPunteo = ptr->sigPunteo->countPunteo;
+                ptr->sigPunteo->countPunteo = tempcountPunteo;
+
+                strcpy(tempuserPunteo, ptr->userPunteo);
+                strcpy(ptr->userPunteo, ptr->sigPunteo->userPunteo);
+                strcpy(ptr->sigPunteo->userPunteo, tempuserPunteo);
+            }
+            ptr = ptr->sigPunteo;
+        }
+        ptr = iniPunteo;
+    }
+}
+
+void displaySortedPunteoList(){
+    sortDescPunteo();
+    auxPunteo = iniPunteo;
+    if(iniPunteo!=NULL){
+        system("CLS");
+            cout<<"---------- Tabla de Puntos ----------"<<endl;
+            cout<<" Usuario\tPunteo"<<endl;
+            cout<<"-------------------------------------"<<endl;
+        while(auxPunteo!=NULL){
+            cout<<" "<<auxPunteo->userPunteo<<"\t\t"<<auxPunteo->countPunteo<<endl;
+            auxPunteo=auxPunteo->sigPunteo;
+        }
+        cout<<"-------------------------------------"<<endl;
+        system("pause");
+    }
+}
+
+void displayCantOrdReC(userGlobal){
+    system("CLS");
+    cout<<"---- Tabla de Ordenes recibidas -----"<<endl;
+    cout<<" Usuario\tCant. Ordenes"<<endl;
+    cout<<"-------------------------------------"<<endl;
+    cout<<" Mecanico A\t\t"<<ordRecMecA<<endl;
+    cout<<" Mecanico B\t\t"<<ordRecMecB<<endl;
+    cout<<" Mecanico C\t\t"<<ordRecMecC<<endl;
+    cout<<" Mecanico X\t\t"<<ordRecMecX<<endl;
+    cout<<" Mecanico Y\t\t"<<ordRecMecY<<endl;
+    cout<<" Mecanico Z\t\t"<<ordRecMecZ<<endl;
+    cout<<"-------------------------------------"<<endl;
+    system("pause");
+}
+
+void displayCantOrdRev(userGlobal){
+
 }

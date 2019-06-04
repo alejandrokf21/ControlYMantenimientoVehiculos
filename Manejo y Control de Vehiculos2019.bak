@@ -1856,7 +1856,7 @@ void MenuControlDeCalidad(){
 
              case 4:
                 //repartirOrden();
-                menu=opcionSalir();                                    
+                menu=opcionSalir();                                    
                 break;
 
              default:
